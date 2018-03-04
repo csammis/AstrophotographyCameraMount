@@ -1,5 +1,6 @@
 #include <msp430.h>
 
+#include "driver.h"
 #include "gps.h"
 #include "graphics.h"
 #include "lcd.h"
@@ -18,17 +19,14 @@ int main(void)
     init_startup_peripherals();
 
     //graphics_draw_world_map();
-
     //lcd_draw_string_n(0, 5, "Searching...", 12);
-
     //graphics_update_world_sweeper(25);
+    //sensors_read_accel(&acc);
+    //sensors_read_mag(&mag);
 
-    while (1)
-    {
-        sensors_read_accel(&acc);
-        sensors_read_mag(&mag);
-        __delay_cycles(10000);
-    }
+    driver_start();
+
+    __bis_SR_register(LPM0_bits);
 
     return 0;
 }
@@ -39,7 +37,9 @@ void init_startup_peripherals(void)
 
     __bis_SR_register(GIE);
 
-    sensors_init();
+    driver_init();
+
+    //sensors_init();
 
     //lcd_init();
     //gps_init();

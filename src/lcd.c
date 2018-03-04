@@ -6,11 +6,6 @@
 #include "charset.h"
 #include <msp430.h>
 
-#define RST_PORT        P3
-#define RST_PIN         2
-#define DC_PORT         P2
-#define DC_PIN          7
-
 // Convenience macros
 #define set_rst()   (P3OUT |=  BIT2)
 #define clr_rst()   (P3OUT &= ~BIT2)
