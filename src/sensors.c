@@ -23,6 +23,7 @@
 #define MAG_CTRL_REG3       0x22
 #define MAG_CTRL_REG4       0x23
 #define MAG_CTRL_REG5       0x24
+#define CTRL_REG_4          0x1E
 #define ACC_CTRL_REG5       0x1F
 #define ACC_CTRL_REG6       0x20
 #define ACC_CTRL_REG7       0x21
@@ -48,18 +49,19 @@ static uint8_t  status;
 #define READ_OP                 1
 #define WRITE_OP                0
 
-#define write_accel_reg(r, d)   i2c_write_reg(ACC_ADDRESS, r, d)
-#define write_mag_reg(r, d)     i2c_write_reg(MAG_ADDRESS, r, d)
+#define signal_transfer_complete()  do { status = STATUS_I2C_DONE; __bic_SR_register_on_exit(LPM0_bits); } while (0);
+#define write_accel_reg(r, d)       i2c_write_reg(ACC_ADDRESS, r, d)
+#define write_mag_reg(r, d)         i2c_write_reg(MAG_ADDRESS, r, d)
+#define enable_power()              (P1OUT |=  BIT1)
+#define disable_power()             (P1OUT &= ~BIT1)
 
 static void i2c_read_reg(uint8_t addr, uint8_t reg, uint8_t data_size);
-static void i2c_select_reg_for_read(uint8_t addr, uint8_t reg);
 static void i2c_write_reg(uint8_t addr, uint8_t reg, uint8_t data);
-static void start_read(void);
-static void start_write(void);
-static inline void set_slave_addr(uint8_t address);
-static inline void wait_for_stop(void);
-static inline void wait_for_transfer(void);
-static inline void reset_interrupt_enables(void);
+static void reset_interrupt_enables(void);
+static void set_slave_addr(uint8_t address);
+static void set_tbcnt(uint16_t size);
+static void wait_for_stop(void);
+static void wait_for_transfer(void);
 
 void sensors_init(void)
 {
@@ -75,6 +77,11 @@ void sensors_init(void)
     UCB0BRW = 0x000A;   // SMCLK / 10 = ~100kHz
     UCB0CTLW0 &= ~UCSWRST;
 
+    enable_power();
+
+    __delay_cycles(1000);
+
+    write_accel_reg(CTRL_REG_4,     0b00000000);    // Shut off gyroscope
     write_accel_reg(ACC_CTRL_REG5,  0b00111000);    // Enable X, Y, Z axes
     write_accel_reg(ACC_CTRL_REG6,  0b01101000);    // ODR @ 119Hz, set full scale to +/- 16G
 
@@ -102,24 +109,28 @@ void sensors_read_mag(axis_type* axes)
 
 static void i2c_read_reg(uint8_t addr, uint8_t reg, uint8_t data_size)
 {
-    i2c_select_reg_for_read(addr, reg);
-    rx_size = data_size;
-    start_read();
-}
-
-static void i2c_select_reg_for_read(uint8_t addr, uint8_t reg)
-{
     tx_buffer[0] = reg;
     tx_size = 1;
+    rx_size = data_size;
+    tx_index = 0;
+    rx_index = 0;
 
     wait_for_stop();
     set_slave_addr(addr);
 
-    // Automatic stops aren't wanted here, so just fire up the transmit without setting UCB0TBCNT
-    status = STATUS_I2C_REGISTER_SEL;
-    tx_index = 0;
+    // Automatic stop after everything is done - register selection and readback
+    set_tbcnt(tx_size + rx_size);
     reset_interrupt_enables();
+
+    // Transmit register selection
+    status = STATUS_I2C_REGISTER_SEL;
     UCB0CTLW0 |= UCTR | UCTXSTT;
+    wait_for_transfer();
+
+    // Receive data
+    status = STATUS_I2C_IN_PROGRESS;
+    UCB0CTLW0 &= ~UCTR;
+    UCB0CTLW0 |= UCTXSTT;
     wait_for_transfer();
 }
 
@@ -128,10 +139,17 @@ static void i2c_write_reg(uint8_t addr, uint8_t reg, uint8_t data)
     tx_buffer[0] = reg;
     tx_buffer[1] = data;
     tx_size = 2;
+    tx_index = 0;
 
     wait_for_stop();
     set_slave_addr(addr);
-    start_write();
+
+    set_tbcnt(tx_size);
+    reset_interrupt_enables();
+
+    status = STATUS_I2C_IN_PROGRESS;
+    UCB0CTLW0 |= UCTR | UCTXSTT;
+    wait_for_transfer();
 }
 
 static inline void set_slave_addr(uint8_t address)
@@ -139,43 +157,16 @@ static inline void set_slave_addr(uint8_t address)
     UCB0I2CSA = address;
 }
 
-#define signal_transfer_complete() do { status = STATUS_I2C_DONE; __bic_SR_register_on_exit(LPM0_bits); } while (0);
+static inline void set_tbcnt(uint16_t size)
+{
+    UCB0CTLW0   |= UCSWRST;
+    UCB0TBCNT    = size;
+    UCB0CTLW0   &= ~UCSWRST;
+}
 
 static void reset_interrupt_enables(void)
 {
     UCB0IE = UCTXIE0 | UCRXIE0 | UCNACKIE | UCBCNTIE;
-}
-
-static void start_read(void)
-{
-    status = STATUS_I2C_IN_PROGRESS;
-    rx_index = 0;
-
-    // Set the data length for automatic stops
-    UCB0CTLW0 |= UCSWRST;
-    UCB0TBCNT = rx_size;
-    UCB0CTLW0 &= ~UCSWRST;
-    reset_interrupt_enables();
-    // Set as receiver and send a START
-    UCB0CTLW0 &= ~UCTR;
-    UCB0CTLW0 |= UCTXSTT;
-
-    wait_for_transfer();
-}
-
-static void start_write(void)
-{
-    status = STATUS_I2C_IN_PROGRESS;
-    tx_index = 0;
-    // Set the data length for automatic stops
-    UCB0CTLW0 |= UCSWRST;
-    UCB0TBCNT = tx_size;
-    UCB0CTLW0 &= ~UCSWRST;
-    reset_interrupt_enables();
-    // Set as transmitter and send a START
-    UCB0CTLW0 |= UCTR | UCTXSTT;
-
-    wait_for_transfer();
 }
 
 static inline void wait_for_stop(void)
@@ -187,9 +178,7 @@ static inline void wait_for_transfer(void)
 {
     while (status != STATUS_I2C_DONE)
     {
-        #if 1
-        __bis_SR_register(LPM0_bits);
-        #endif
+        __bis_SR_register(LPM0_bits | GIE);
     }
 }
 
@@ -203,19 +192,21 @@ __interrupt void USCIB0_ISR(void)
         UCB0CTL1 |= UCTXSTT;
         break;
     case USCI_I2C_UCTXIFG0:
-        // TX ready
         if (tx_index < tx_size)
         {
             UCB0TXBUF = tx_buffer[tx_index++];
-        }
-        else if (status == STATUS_I2C_REGISTER_SEL)
-        {
-            // Not going to get an automatic stop so signal done
-            signal_transfer_complete();
+            if (tx_index == tx_size && status == STATUS_I2C_REGISTER_SEL)
+            {
+                // There won't be an automatic stop after the register selection data so signal complete manually
+                signal_transfer_complete();
+            }
         }
         break;
     case USCI_I2C_UCRXIFG0:
-        rx_buffer[rx_index++] = UCB0RXBUF;
+        if (rx_index < rx_size)
+        {
+            rx_buffer[rx_index++] = UCB0RXBUF;
+        }
         break;
     case USCI_I2C_UCBCNTIFG:
         signal_transfer_complete();

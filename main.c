@@ -14,7 +14,6 @@ int main(void)
 
     axis_type mag;
     axis_type acc;
-    uint16_t delay = 20000;
 
     init_startup_peripherals();
 
@@ -23,14 +22,14 @@ int main(void)
     //lcd_draw_string_n(0, 5, "Searching...", 12);
 
     //graphics_update_world_sweeper(25);
-    
-    while(delay--) { }
-    
-    sensors_read_accel(&acc);
-    sensors_read_mag(&mag);
 
-    while(1) { }
-    
+    while (1)
+    {
+        sensors_read_accel(&acc);
+        sensors_read_mag(&mag);
+        __delay_cycles(10000);
+    }
+
     return 0;
 }
 
