@@ -1,10 +1,19 @@
 #include "driver.h"
 #include <msp430.h>
 
-#define set_dir_forward()   (P1OUT &= ~BIT7)
-#define set_dir_reverse()   (P1OUT |=  BIT7)
+#define set_dir_forward()   (P1OUT |=  BIT7)
+#define set_dir_reverse()   (P1OUT &= &BIT7)
 
-#define PWM_PERIOD  1000
+
+/*-----------------------------------------------
+At a gear ratio of 11 : 29, the driver must issue
+an 1/8th step every 14ms...ish. The PWM_PERIOD is
+experimentally confirmed to result in 1RPM at the
+screw gear. OUTMOD_7 results in a rising edge
+PWM_PERIOD.
+-----------------------------------------------*/
+
+#define PWM_PERIOD  14750
 #define TMR_CLK_SRC TASSEL__SMCLK
 
 void driver_init(void)
