@@ -27,7 +27,10 @@
 #define ACC_CTRL_REG5       0x1F
 #define ACC_CTRL_REG6       0x20
 #define ACC_CTRL_REG7       0x21
+#define ACC_CTRL_REG8       0x22
 #define MAG_OUTPUT_DATA     0x28
+#define ACC_STATUS_REG      0x27
+#define ACC_STATUS_REG_XLDA 0x01
 #define ACC_OUTPUT_DATA     0x28
 
 // Constant sized buffers for RX and TX
@@ -81,6 +84,11 @@ void sensors_init(void)
 
     __delay_cycles(1000);
 
+    write_accel_reg(ACC_CTRL_REG8,  0b00000101);    // Reboot the accel/gyro
+    write_mag_reg(  MAG_CTRL_REG2,  0b00001100);    // Reboot the magnetometer
+
+    __delay_cycles(1000);
+
     write_accel_reg(CTRL_REG_4,     0b00000000);    // Shut off gyroscope
     write_accel_reg(ACC_CTRL_REG5,  0b00111000);    // Enable X, Y, Z axes
     write_accel_reg(ACC_CTRL_REG6,  0b01101000);    // ODR @ 119Hz, set full scale to +/- 16G
@@ -118,8 +126,7 @@ static void i2c_read_reg(uint8_t addr, uint8_t reg, uint8_t data_size)
     wait_for_stop();
     set_slave_addr(addr);
 
-    // Automatic stop after everything is done - register selection and readback
-    set_tbcnt(tx_size + rx_size);
+    set_tbcnt(rx_size);
     reset_interrupt_enables();
 
     // Transmit register selection
@@ -206,6 +213,13 @@ __interrupt void USCIB0_ISR(void)
         if (rx_index < rx_size)
         {
             rx_buffer[rx_index++] = UCB0RXBUF;
+        }
+        else
+        {
+            while (1)
+            {
+                /* trap */ ;
+            }
         }
         break;
     case USCI_I2C_UCBCNTIFG:

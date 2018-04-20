@@ -10,6 +10,8 @@ typedef struct
     uint16_t z;
 } axis_type;
 
+#define init_axis_type(a) do { a.x = a.y = a.z = 0; } while(0);
+
 void sensors_init(void);
 
 void sensors_read_accel(axis_type* axes);
