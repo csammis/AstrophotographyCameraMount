@@ -60,6 +60,7 @@ static uint8_t  status;
 
 static void i2c_read_reg(uint8_t addr, uint8_t reg, uint8_t data_size);
 static void i2c_write_reg(uint8_t addr, uint8_t reg, uint8_t data);
+static void read_sensor_reg(uint8_t addr, uint8_t reg, axis_type* axes);
 static void reset_interrupt_enables(void);
 static void set_slave_addr(uint8_t address);
 static void set_tbcnt(uint16_t size);
@@ -99,20 +100,22 @@ void sensors_init(void)
     write_mag_reg(MAG_CTRL_REG4,    0b00001000);    // Enable high performance in Z-axis only, X and Y at low power
 }
 
+static void read_sensor_reg(uint8_t addr, uint8_t reg, axis_type* axes)
+{
+    i2c_read_reg(addr, reg, 6);
+    axes->x = _Q10((rx_buffer[1] << 8) | rx_buffer[0]);
+    axes->y = _Q10((rx_buffer[3] << 8) | rx_buffer[2]);
+    axes->z = _Q10((rx_buffer[5] << 8) | rx_buffer[4]);
+}
+
 void sensors_read_accel(axis_type* axes)
 {
-    i2c_read_reg(ACC_ADDRESS, ACC_OUTPUT_DATA, 6);
-    axes->x = (rx_buffer[1] << 8) | rx_buffer[0];
-    axes->y = (rx_buffer[3] << 8) | rx_buffer[2];
-    axes->z = (rx_buffer[5] << 8) | rx_buffer[4];
+    read_sensor_reg(ACC_ADDRESS, ACC_OUTPUT_DATA, axes);
 }
 
 void sensors_read_mag(axis_type* axes)
 {
-    i2c_read_reg(MAG_ADDRESS, MAG_OUTPUT_DATA, 6);
-    axes->x = (rx_buffer[1] << 8) | rx_buffer[0];
-    axes->y = (rx_buffer[3] << 8) | rx_buffer[2];
-    axes->z = (rx_buffer[5] << 8) | rx_buffer[4];
+    read_sensor_reg(MAG_ADDRESS, MAG_OUTPUT_DATA, axes);
 }
 
 static void i2c_read_reg(uint8_t addr, uint8_t reg, uint8_t data_size)
