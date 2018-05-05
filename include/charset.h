@@ -1,7 +1,7 @@
 #ifndef _CHARSET_H_
 #define _CHARSET_H_
 
-#define get_char_index(c)   (c - ' ')
+#define get_char_index(c)   ((uint32_t)(c - ' '))
 #define CHARWIDTH   5
 
 const unsigned char charset[][CHARWIDTH] = {
