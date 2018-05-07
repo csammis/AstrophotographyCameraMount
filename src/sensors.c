@@ -55,8 +55,6 @@ static uint8_t  status;
 #define signal_transfer_complete()  do { status = STATUS_I2C_DONE; __bic_SR_register_on_exit(LPM0_bits); } while (0);
 #define write_accel_reg(r, d)       i2c_write_reg(ACC_ADDRESS, r, d)
 #define write_mag_reg(r, d)         i2c_write_reg(MAG_ADDRESS, r, d)
-#define enable_power()              (P1OUT |=  BIT0)
-#define disable_power()             (P1OUT &= ~BIT0)
 
 static void i2c_read_reg(uint8_t addr, uint8_t reg, uint8_t data_size);
 static void i2c_write_reg(uint8_t addr, uint8_t reg, uint8_t data);
@@ -80,8 +78,6 @@ void sensors_init(void)
 
     UCB0BRW = 0x000A;   // SMCLK / 10 = ~100kHz
     UCB0CTLW0 &= ~UCSWRST;
-
-    enable_power();
 
     __delay_cycles(1000);
 

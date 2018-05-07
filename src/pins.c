@@ -4,13 +4,13 @@
 /*-----------------------------------------------
  * Pin Allocations
  *
- * P1.0 SNS GPIO OUTPUT     SNS_EN
+ * P1.0 GPS GPIO OUTPUT     GPS_EN
  * P1.1 DRV TA0.1 PWM       Function 10, output
  * P1.2 SNS UCB0 I2C SDA    Function 01
  * P1.3 SNS UCB0 I2C SCL    Function 01
  * P1.4 GPS UCA0 UART TX    Function 01
  * P1.5 GPS UCA0 UART RX    Function 01
- * P1.6
+ * P1.6 GPS GPIO INPUT      GPS_FIX
  * P1.7 DRV GPIO OUTPUT     DRV_DIR
  * P2.0
  * P2.1
