@@ -11,7 +11,19 @@ static event_t events[EVENT_COUNT] =
     /*          ID                  Period      */
     /* EVENT_DISPLAY_UPDATE */  {   100     },
     /* EVENT_SENSOR_UPDATE  */  {   50      },
+    /* EVENT_GPS_UPDATE     */  {   1000    },
 };
+
+void event_disable(event_source_t event)
+{
+    events[event].enabled = FALSE;
+}
+
+void event_enable(event_source_t event)
+{
+    events[event].remaining_ticks = events[event].period;
+    events[event].enabled = TRUE;
+}
 
 boolean event_has_triggered(event_source_t event)
 {
@@ -24,6 +36,7 @@ void events_init(void)
     for (i = 0; i < EVENT_COUNT; i++)
     {
         events[i].remaining_ticks = events[i].period;
+        events[i].enabled = FALSE;
     }
 }
 
@@ -35,7 +48,7 @@ void update_events_and_sleep(void)
     // Reset any events which have elapsed
     for (i = 0; i < EVENT_COUNT; i++)
     {
-        if (event_has_triggered(i))
+        if (events[i].enabled && event_has_triggered(i))
         {
             events[i].remaining_ticks = events[i].period;
         }
@@ -45,7 +58,7 @@ void update_events_and_sleep(void)
     next_wakeup = MAX_SLEEP_MS;
     for (i = 0; i < EVENT_COUNT; i++)
     {
-        if (events[i].remaining_ticks < next_wakeup)
+        if (events[i].enabled && events[i].remaining_ticks < next_wakeup)
         {
             next_wakeup = events[i].remaining_ticks;
         }
@@ -56,7 +69,10 @@ void update_events_and_sleep(void)
         // Decrement the remaining time on the events
         for (i = 0; i < EVENT_COUNT; i++)
         {
-            events[i].remaining_ticks -= next_wakeup;
+            if (events[i].enabled)
+            {
+                events[i].remaining_ticks -= next_wakeup;
+            }
         }
 
         // Set Timer1 to generate an interrupt

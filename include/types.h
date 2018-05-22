@@ -20,7 +20,14 @@ typedef struct
     _q10 z;
 } axis_type;
 
+typedef struct
+{
+    _q7 latitude;
+    _q7 longitude;
+} coordinate_type;
+
 #define init_axis_type(a) do { a.x = a.y = a.z = 0; } while(0);
+#define init_coordinate_type(c) do { c.latitude = c.longitude = 0; } while(0);
 
 
 #endif

@@ -38,6 +38,21 @@ int main(void)
             graphics_update_world_sweeper(30);
         }
 
+        if (event_has_triggered(EVENT_GPS_UPDATE))
+        {
+            if (gps_has_fix())
+            {
+                coordinate_type coordinates;
+                gps_get_coordinates(&coordinates);
+                positioning_set_coordinates(&coordinates);
+
+                // Now that we have a fix, start updating the accel/mag
+                // sensors to produce a heading and tilt
+                event_disable(EVENT_GPS_UPDATE);
+                event_enable(EVENT_SENSOR_UPDATE);
+            }
+        }
+
         update_events_and_sleep();
     }
 
@@ -67,5 +82,5 @@ void init_startup_peripherals(void)
     lcd_init();
     positioning_init();
     sensors_init();
-    //gps_init();
+    gps_init();
 }
