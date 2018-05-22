@@ -1,8 +1,10 @@
 #include "positioning.h"
 
 static axis_type    current_accel_reading;
+static axis_type    current_mag_reading;
 
 static boolean      got_accel_reading;
+static boolean      got_mag_reading;
 
 static _q10         current_pitch;
 static _q10         current_roll;
@@ -29,6 +31,7 @@ static void normalize(axis_type* original, axis_type* normal)
 void positioning_init()
 {
     got_accel_reading = FALSE;
+    got_mag_reading = FALSE;
     current_pitch = POSITION_INVALID;
     current_roll = POSITION_INVALID;
 }
@@ -69,4 +72,10 @@ void positioning_set_accel_reading(axis_type* axes)
     -------------------------------------------*/
     current_pitch   = POSITION_INVALID;
     current_roll    = POSITION_INVALID;
+}
+
+void positioning_set_mag_reading(axis_type* axes)
+{
+    normalize(axes, &current_mag_reading);
+    got_mag_reading = TRUE;
 }
