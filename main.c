@@ -3,13 +3,11 @@
 #include "driver.h"
 #include "events.h"
 #include "gps.h"
-#include "graphics.h"
 #include "lcd.h"
 #include "pins.h"
 #include "positioning.h"
 #include "sensors.h"
-
-#include "QmathLib.h"
+#include "ui.h"
 
 void init_startup_peripherals(void);
 void update_sensors(void);
@@ -20,11 +18,10 @@ int main(void)
 
     init_startup_peripherals();
 
-    graphics_draw_world_map();
-    lcd_draw_string_n(0, 5, "Searching...", 12);
-    graphics_update_world_sweeper(25);
+    event_enable(EVENT_DISPLAY_UPDATE);
+    event_enable(EVENT_GPS_UPDATE);
 
-    driver_start();
+    ui_set_state(UI_GPS_ACQUIRING_FIX);
 
     while (1)
     {
@@ -35,7 +32,7 @@ int main(void)
 
         if (event_has_triggered(EVENT_DISPLAY_UPDATE))
         {
-            graphics_update_world_sweeper(30);
+            ui_update();
         }
 
         if (event_has_triggered(EVENT_GPS_UPDATE))
@@ -45,6 +42,8 @@ int main(void)
                 coordinate_type coordinates;
                 gps_get_coordinates(&coordinates);
                 positioning_set_coordinates(&coordinates);
+
+                ui_set_state(UI_POS_ADJUST_TILT);
 
                 // Now that we have a fix, start updating the accel/mag
                 // sensors to produce a heading and tilt

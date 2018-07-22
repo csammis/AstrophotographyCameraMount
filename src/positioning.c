@@ -10,23 +10,28 @@ static boolean      got_lat_lon;
 
 static _q10         current_pitch;
 static _q10         current_roll;
+static _q10         current_heading;
+
+static _iq          accel_divisor;
+static _iq          mag_divisor;
 
 static void normalize(axis_type* original, axis_type* normal);
 
 static void normalize(axis_type* original, axis_type* normal)
 {
-    _q10 magnitude = _Q10sqrt(_Q10rmpy(original->x, original->x) +
-                              _Q10rmpy(original->y, original->y) +
-                              _Q10rmpy(original->z, original->z));
+    _iq16 x2 = _IQrmpy(original->x, original->x);
+    _iq16 y2 = _IQrmpy(original->y, original->y);
+    _iq16 z2 = _IQrmpy(original->z, original->z);
+    _iq16 magnitude = _IQ16sqrt(x2 + y2 + z2);
     if (magnitude == 0)
     {
         normal->x = normal->y = normal->z = 0;
     }
     else
     {
-        normal->x = _Q10div(original->x, magnitude);
-        normal->y = _Q10div(original->y, magnitude);
-        normal->z = _Q10div(original->z, magnitude);
+        normal->x = _IQdiv(original->x, magnitude);
+        normal->y = _IQdiv(original->y, magnitude);
+        normal->z = _IQdiv(original->z, magnitude);
     }
 }
 
@@ -37,6 +42,13 @@ void positioning_init()
     got_lat_lon = FALSE;
     current_pitch = POSITION_INVALID;
     current_roll = POSITION_INVALID;
+    current_heading = POSITION_INVALID;
+
+    accel_divisor = _IQ(0.732f);
+    accel_divisor = _IQdiv(accel_divisor, _IQ(1000.0f));
+
+    mag_divisor = _IQ(0.58);
+    mag_divisor = _IQdiv(mag_divisor, _IQ(1000.0f));
 }
 
 _q10 positioning_get_current_pitch()
@@ -45,7 +57,8 @@ _q10 positioning_get_current_pitch()
     {
         if (got_accel_reading)
         {
-            current_pitch = _Q10asin(_Q10mpy(current_accel_reading.x, _Q10(-1)));
+            _q10 x = _IQtoQ10(current_accel_reading.x);
+            current_pitch = _Q10asin(_Q10mpy(x, _Q10(-1)));
         }
     }
     return current_pitch;
@@ -58,15 +71,26 @@ _q10 positioning_get_current_roll()
         _q10 p = positioning_get_current_pitch();
         if (p != POSITION_INVALID)
         {
-            current_roll = _Q10asin(_Q10div(current_accel_reading.y, _Q10cos(p)));
+            _q10 y = _IQtoQ10(current_accel_reading.y);
+            current_roll = _Q10asin(_Q10div(y, _Q10cos(p)));
         }
     }
     return current_roll;
 }
 
+_q10 positioning_get_current_heading()
+{
+    return current_heading;
+}
+
 void positioning_set_accel_reading(axis_type* axes)
 {
-    normalize(axes, &current_accel_reading);
+    axis_type divided;
+    divided.x = _IQdiv(axes->x, accel_divisor);
+    divided.y = _IQdiv(axes->y, accel_divisor);
+    divided.z = _IQdiv(axes->z, accel_divisor);
+
+    normalize(&divided, &current_accel_reading);
     got_accel_reading = TRUE;
 
     /*-------------------------------------------
@@ -79,7 +103,12 @@ void positioning_set_accel_reading(axis_type* axes)
 
 void positioning_set_mag_reading(axis_type* axes)
 {
-    normalize(axes, &current_mag_reading);
+    axis_type divided;
+    divided.x = _IQdiv(axes->x, mag_divisor);
+    divided.y = _IQdiv(axes->y, mag_divisor);
+    divided.z = _IQdiv(axes->z, mag_divisor);
+
+    normalize(&divided, &current_mag_reading);
     got_mag_reading = TRUE;
 }
 

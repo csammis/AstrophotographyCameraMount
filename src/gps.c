@@ -13,7 +13,7 @@ boolean gps_has_fix(void)
     // Simulate not having a fix for a while
     static uint8_t fix_samples = 0;
 
-    if (fix_samples++ >= 10)
+    if (fix_samples++ >= 5)
     {
         return TRUE;
     }

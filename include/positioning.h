@@ -13,5 +13,6 @@ void positioning_set_coordinates(coordinate_type* coordinates);
 
 _q10 positioning_get_current_pitch();
 _q10 positioning_get_current_roll();
+_q10 positioning_get_current_heading();
 
 #endif
