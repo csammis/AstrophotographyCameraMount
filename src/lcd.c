@@ -106,7 +106,7 @@ void lcd_draw_string_n(uint8_t x, uint8_t y, const char* str, uint32_t len)
     set_cursor_position(x, y);
     for(; i < len; i++)
     {
-        c = (char*)charset[get_char_index(str[i])];
+        c = get_char_buffer(get_char_index(str[i]));
         write_data_buffer((uint8_t*)c, CHARWIDTH);
     }
 }

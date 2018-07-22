@@ -1,7 +1,7 @@
 #ifndef _GRAPHICS_H_
 #define _GRAPHICS_H_
 
-#include "types.h"
+#include <stdint.h>
 
 void graphics_draw_world_map(void);
 
