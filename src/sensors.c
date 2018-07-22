@@ -99,9 +99,9 @@ void sensors_init(void)
 static void read_sensor_reg(uint8_t addr, uint8_t reg, axis_type* axes)
 {
     i2c_read_reg(addr, reg, 6);
-    axes->x = _Q10((rx_buffer[1] << 8) | rx_buffer[0]);
-    axes->y = _Q10((rx_buffer[3] << 8) | rx_buffer[2]);
-    axes->z = _Q10((rx_buffer[5] << 8) | rx_buffer[4]);
+    axes->x = _IQ16((float)((rx_buffer[1] << 8) | rx_buffer[0]));
+    axes->y = _IQ16((float)((rx_buffer[3] << 8) | rx_buffer[2]));
+    axes->z = _IQ16((float)((rx_buffer[5] << 8) | rx_buffer[4]));
 }
 
 void sensors_read_accel(axis_type* axes)

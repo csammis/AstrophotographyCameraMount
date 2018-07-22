@@ -6,6 +6,10 @@
 #define _TYPES_H_
 
 #include <stdint.h>
+
+#define GLOBAL_IQ       16
+
+#include "IQmathLib.h"
 #include "QmathLib.h"
 
 typedef uint8_t         boolean;
@@ -15,9 +19,9 @@ typedef uint8_t         boolean;
 
 typedef struct
 {
-    _q10 x;
-    _q10 y;
-    _q10 z;
+    _iq16 x;
+    _iq16 y;
+    _iq16 z;
 } axis_type;
 
 typedef struct
