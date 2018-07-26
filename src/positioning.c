@@ -37,18 +37,15 @@ static void normalize(axis_type* original, axis_type* normal)
 
 void positioning_init()
 {
-    got_accel_reading = FALSE;
-    got_mag_reading = FALSE;
-    got_lat_lon = FALSE;
-    current_pitch = POSITION_INVALID;
-    current_roll = POSITION_INVALID;
-    current_heading = POSITION_INVALID;
+    got_accel_reading   = FALSE;
+    got_mag_reading     = FALSE;
+    got_lat_lon         = FALSE;
+    current_pitch       = POSITION_INVALID;
+    current_roll        = POSITION_INVALID;
+    current_heading     = POSITION_INVALID;
 
-    accel_divisor = _IQ(0.732f);
-    accel_divisor = _IQdiv(accel_divisor, _IQ(1000.0f));
-
-    mag_divisor = _IQ(0.58);
-    mag_divisor = _IQdiv(mag_divisor, _IQ(1000.0f));
+    accel_divisor       = _IQ(0.000732f);
+    mag_divisor         = _IQ(0.00058f);
 }
 
 _q10 positioning_get_current_pitch()
@@ -85,12 +82,12 @@ _q10 positioning_get_current_heading()
 
 void positioning_set_accel_reading(axis_type* axes)
 {
-    axis_type divided;
-    divided.x = _IQdiv(axes->x, accel_divisor);
-    divided.y = _IQdiv(axes->y, accel_divisor);
-    divided.z = _IQdiv(axes->z, accel_divisor);
+    axis_type scaled;
+    scaled.x = _IQrsmpy(axes->x, accel_divisor);
+    scaled.y = _IQrsmpy(axes->y, accel_divisor);
+    scaled.z = _IQrsmpy(axes->z, accel_divisor);
 
-    normalize(&divided, &current_accel_reading);
+    normalize(&scaled, &current_accel_reading);
     got_accel_reading = TRUE;
 
     /*-------------------------------------------
@@ -103,12 +100,12 @@ void positioning_set_accel_reading(axis_type* axes)
 
 void positioning_set_mag_reading(axis_type* axes)
 {
-    axis_type divided;
-    divided.x = _IQdiv(axes->x, mag_divisor);
-    divided.y = _IQdiv(axes->y, mag_divisor);
-    divided.z = _IQdiv(axes->z, mag_divisor);
+    axis_type scaled;
+    scaled.x = _IQrsmpy(axes->x, mag_divisor);
+    scaled.y = _IQrsmpy(axes->y, mag_divisor);
+    scaled.z = _IQrsmpy(axes->z, mag_divisor);
 
-    normalize(&divided, &current_mag_reading);
+    normalize(&scaled, &current_mag_reading);
     got_mag_reading = TRUE;
 }
 

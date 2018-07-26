@@ -18,8 +18,8 @@
 #define HEADING_VAL_START   ((HEADING_LEN) * CHARWIDTH)
 #define TILT_VAL_START      ((TILT_LEN) * CHARWIDTH)
 
-#define INVALID_VALUE       "?"
-#define INVALID_VALUE_LEN   1
+#define INVALID_VALUE       "?       "
+#define INVALID_VALUE_LEN   8
 
 static ui_state_t   ui_state;
 static ui_state_t   next_ui_state;
@@ -35,6 +35,7 @@ void ui_init(void)
 {
     ui_state = UI_NOT_STARTED;
     label_drawn = FALSE;
+    clear_qtoa_buffer();
 }
 
 void ui_set_state(ui_state_t state)
