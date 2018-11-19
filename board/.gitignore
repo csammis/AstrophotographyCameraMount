@@ -1,0 +1,17 @@
+# KiCad .gitignores
+
+*.bak
+*.bck
+*.kicad_pcb-bak
+_autosave-*
+*.tmp
+*-rescue.lib
+*-save.pro
+*-save.kicad_pcb
+
+*.xml
+*.csv
+*.jpg
+*.png
+
+gerbers/*
