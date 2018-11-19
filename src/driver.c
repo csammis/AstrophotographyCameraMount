@@ -11,9 +11,12 @@ an 1/8th step every 14ms...ish. The PWM_PERIOD is
 experimentally confirmed to result in 1RPM at the
 screw gear. OUTMOD_7 results in a rising edge
 PWM_PERIOD.
+
+Ignore the above! We're going for one 1/8th step
+every 0.9ms
 -----------------------------------------------*/
 
-#define PWM_PERIOD  14750
+#define PWM_PERIOD  900
 #define TMR_CLK_SRC TASSEL__SMCLK
 
 void driver_init(void)

@@ -10,8 +10,6 @@ static event_t events[EVENT_COUNT] =
 {
     /*          ID                  Period      */
     /* EVENT_DISPLAY_UPDATE */  {   100     },
-    /* EVENT_SENSOR_UPDATE  */  {   50      },
-    /* EVENT_GPS_UPDATE     */  {   1000    },
 };
 
 void event_disable(event_source_t event)

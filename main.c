@@ -19,23 +19,24 @@ int main(void)
     init_startup_peripherals();
 
     event_enable(EVENT_DISPLAY_UPDATE);
-    event_enable(EVENT_GPS_UPDATE);
+    driver_start();
+    //event_enable(EVENT_GPS_UPDATE);
 
     ui_set_state(UI_GPS_ACQUIRING_FIX);
 
     while (1)
     {
-        if (event_has_triggered(EVENT_SENSOR_UPDATE))
+        /*if (event_has_triggered(EVENT_SENSOR_UPDATE))
         {
             update_sensors();
-        }
+        }*/
 
         if (event_has_triggered(EVENT_DISPLAY_UPDATE))
         {
             ui_update();
         }
 
-        if (event_has_triggered(EVENT_GPS_UPDATE))
+        /*if (event_has_triggered(EVENT_GPS_UPDATE))
         {
             if (gps_has_fix())
             {
@@ -50,7 +51,7 @@ int main(void)
                 event_disable(EVENT_GPS_UPDATE);
                 event_enable(EVENT_SENSOR_UPDATE);
             }
-        }
+        }*/
 
         update_events_and_sleep();
     }
@@ -79,7 +80,7 @@ void init_startup_peripherals(void)
     driver_init();
     events_init();
     lcd_init();
-    positioning_init();
+    /*positioning_init();
     sensors_init();
-    gps_init();
+    gps_init();*/
 }
