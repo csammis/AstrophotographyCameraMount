@@ -7,8 +7,7 @@
 typedef uint8_t event_source_t; enum
 {
     EVENT_DISPLAY_UPDATE,
-    //EVENT_SENSOR_UPDATE,
-    //EVENT_GPS_UPDATE,
+    EVENT_BUTTON_CHECK,
 
     EVENT_COUNT
 };

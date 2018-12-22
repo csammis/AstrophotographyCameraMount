@@ -1,101 +1,223 @@
 #include "ui.h"
 
+#include "buttons.h"
 #include "charset.h"
-#include "gps.h"
 #include "graphics.h"
 #include "lcd.h"
-#include "positioning.h"
+#include "options.h"
 
-#define SEARCHING           "Searching..."
-#define SEARCHING_LEN       12
+#define MAX_WIDTH               (84 / 5)
+#define SELECTION_INDICATOR     "*"
+#define CHAR_HEIGHT             8
+#define ROW_TO_Y_OFFSET(i)      (i * CHAR_HEIGHT)
 
-#define HEADING             "Heading: "
-#define HEADING_LEN         9
+typedef uint8_t menu_id_t; enum
+{
+    UI_MENU_NONE,
+    UI_MENU_MAIN,
+    UI_MENU_SPEED,
+    UI_MENU_TIMER
+};
 
-#define TILT                "Tilt: "
-#define TILT_LEN            6
+typedef struct
+{
+    menu_id_t   id;
+    char**      items;
+    uint8_t     item_count;
+    uint8_t     current_selection;
+} menu_t;
 
-#define HEADING_VAL_START   ((HEADING_LEN) * CHARWIDTH)
-#define TILT_VAL_START      ((TILT_LEN) * CHARWIDTH)
+// All menu items must start with two spaces to accommodate the * selection indicator
+#define MAIN_MENU_ITEMS     4
+static const char* main_menu[MAIN_MENU_ITEMS] =
+{
+    "  Start",
+    "  Set timer",
+    "  Set speed",
+    "  Off"
+};
 
-#define INVALID_VALUE       "?       "
-#define INVALID_VALUE_LEN   8
+#define TIMER_MENU_ITEMS    5
+static const char* timer_menu[TIMER_MENU_ITEMS] =
+{
+    "  10 seconds",
+    "  30 seconds",
+    "  60 seconds",
+    "  90 seconds",
+    "  120 seconds"
+};
+
+#define SPEED_MENU_ITEMS    2
+static const char* speed_menu[SPEED_MENU_ITEMS] =
+{
+    "  Sidereal",
+    "  Lunar"
+};
 
 static ui_state_t   ui_state;
 static ui_state_t   next_ui_state;
-static uint32_t     sweeper_pos;
-static boolean      label_drawn;
+static menu_t       active_menu;
+static boolean      ok_has_been_pressed;
+static boolean      select_has_been_pressed;
 
-#define QTOA_FORMAT     "%3.2f"
-#define MAX_CHAR_WIDTH  8
-static char             qtoa_buffer[MAX_CHAR_WIDTH];
-#define clear_qtoa_buffer() do { uint8_t i; for (i = 0; i < MAX_CHAR_WIDTH; i++) { qtoa_buffer[i] = ' '; } } while(0);
+static void render_menu(menu_t* menu);
+static void clear_menu_item_selection(uint8_t row);
+static void set_active_menu(menu_id_t menu, uint8_t selected_row);
+static void set_menu_item_selection(uint8_t row);
+
+static uint16_t strlen(const char* s);
+static uint16_t strlen(const char* s)
+{
+    char* e = (char*)s;
+    while(*e) { e++; }
+    return e - s;
+}
+
+static void render_menu(menu_t* menu)
+{
+    uint8_t i;
+
+    lcd_clear();
+
+    // Don't need to worry about paging here
+    for (i = 0; i < menu->item_count; i++)
+    {
+        lcd_draw_string_n(0, i, menu->items[i], strlen(menu->items[i]));
+    }
+
+    set_menu_item_selection(menu->current_selection);
+}
+
+static void clear_menu_item_selection(uint8_t row)
+{
+    lcd_draw_string_n(0, row, " ", 1);
+}
+
+static void set_menu_item_selection(uint8_t row)
+{
+    lcd_draw_string_n(0, row, SELECTION_INDICATOR, 1);
+}
+
+static void set_active_menu(menu_id_t menu, uint8_t selected_row)
+{
+    switch(menu)
+    {
+        case UI_MENU_MAIN:
+            active_menu.items = (char**)main_menu;
+            active_menu.item_count = MAIN_MENU_ITEMS;
+            break;
+        case UI_MENU_TIMER:
+            active_menu.items = (char**)timer_menu;
+            active_menu.item_count = TIMER_MENU_ITEMS;
+            break;
+        case UI_MENU_SPEED:
+            active_menu.items = (char**)speed_menu;
+            active_menu.item_count = SPEED_MENU_ITEMS;
+            break;
+    }
+    active_menu.id = menu;
+    active_menu.current_selection = selected_row;
+    render_menu(&active_menu);
+}
 
 void ui_init(void)
 {
-    ui_state = UI_NOT_STARTED;
-    label_drawn = FALSE;
-    clear_qtoa_buffer();
+    ui_state = UI_STATE_NOT_STARTED;
+    next_ui_state = UI_STATE_NOT_STARTED;
+    active_menu.id = UI_MENU_NONE;
+    ok_has_been_pressed = FALSE;
+    select_has_been_pressed = FALSE;
+}
+
+void ui_process_ok_press(void)
+{
+    switch (active_menu.id)
+    {
+    case UI_MENU_MAIN:
+        switch (active_menu.current_selection)
+        {
+            case 0:
+                // Start
+                break;
+            case 1:
+                set_active_menu(UI_MENU_TIMER, options_get_shutter_speed());
+                break;
+            case 2:
+                set_active_menu(UI_MENU_SPEED, options_get_rotation_speed());
+                break;
+            case 3:
+                // Off
+                break;
+        }
+        break;
+    case UI_MENU_TIMER:
+        options_set_shutter_speed(active_menu.current_selection);
+        set_active_menu(UI_MENU_MAIN, 0);
+        break;
+    case UI_MENU_SPEED:
+        options_set_rotation_speed(active_menu.current_selection);
+        set_active_menu(UI_MENU_MAIN, 0);
+        break;
+    case UI_MENU_NONE:
+        // Cancel whatever's going on
+        set_active_menu(UI_MENU_MAIN, 0);
+        break;
+    }
+}
+
+void ui_process_select_press(void)
+{
+    if (active_menu.id != UI_MENU_NONE)
+    {
+        clear_menu_item_selection(active_menu.current_selection);
+        active_menu.current_selection++;
+        if (active_menu.current_selection == active_menu.item_count)
+        {
+            active_menu.current_selection = 0;
+        }
+        set_menu_item_selection(active_menu.current_selection);
+    }
 }
 
 void ui_set_state(ui_state_t state)
 {
     next_ui_state = state;
-    label_drawn = FALSE;
 }
 
 void ui_update(void)
 {
     switch (ui_state)
     {
-    case UI_NOT_STARTED:
-        graphics_draw_world_map();
-        if (label_drawn == FALSE)
-        {
-            lcd_draw_string_n(0, 5, SEARCHING, SEARCHING_LEN);
-            label_drawn = TRUE;
-        }
-        sweeper_pos = 0;
+    case UI_STATE_NOT_STARTED:
+        set_active_menu(UI_MENU_MAIN, 0);
+        next_ui_state = UI_STATE_IN_SETUP;
         break;
-    case UI_GPS_ACQUIRING_FIX:
-        graphics_update_world_sweeper(sweeper_pos++);
-        break;
-    case UI_POS_ADJUST_HEADING:
+    case UI_STATE_IN_SETUP:
+        if (is_button_pressed(BUTTON_OK))
         {
-            if (label_drawn == FALSE)
+            if (ok_has_been_pressed == FALSE)
             {
-                lcd_draw_string_n(0, 5, HEADING, HEADING_LEN);
-                label_drawn = TRUE;
-            }
-            
-            _q10 heading = positioning_get_current_heading();
-            if (heading == POSITION_INVALID)
-            {
-                lcd_draw_string_n(HEADING_VAL_START, 5, INVALID_VALUE, INVALID_VALUE_LEN);
+                ui_process_ok_press();
+                ok_has_been_pressed = TRUE;
             }
         }
-        break;
-    case UI_POS_ADJUST_TILT:
+        else
         {
-            if (label_drawn == FALSE)
-            {
-                lcd_draw_string_n(0, 5, TILT, TILT_LEN);
-                label_drawn = TRUE;
-            }
+            ok_has_been_pressed = FALSE;
+        }
 
-            _q10 pitch = positioning_get_current_pitch();
-            if (pitch == POSITION_INVALID)
+        if (is_button_pressed(BUTTON_SELECT))
+        {
+            if (select_has_been_pressed == FALSE)
             {
-                lcd_draw_string_n(TILT_VAL_START, 5, INVALID_VALUE, INVALID_VALUE_LEN);
-            }
-            else
-            {
-                clear_qtoa_buffer();
-                _Q10toa(qtoa_buffer, QTOA_FORMAT, pitch);
-                lcd_draw_string_n(TILT_VAL_START, 5, qtoa_buffer, 8);
+                ui_process_select_press();
+                select_has_been_pressed = TRUE;
             }
         }
-        break;
+        else
+        {
+            select_has_been_pressed = FALSE;
+        }
     }
 
     ui_state = next_ui_state;

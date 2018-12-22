@@ -11,6 +11,8 @@
 #define clr_rst()   (P3OUT &= ~BIT2)
 #define set_dc()    (P2OUT |=  BIT7)
 #define clr_dc()    (P2OUT &= ~BIT7)
+#define set_led()   (P2OUT |=  BIT5)
+#define clr_led()   (P2OUT &= ~BIT5)
 
 // PCD8544 command set
 #define PCD8544_POWERDOWN               0x04
@@ -42,7 +44,9 @@ uint32_t    tx_index;
 
 #define STATUS_SPI_DONE         0
 #define STATUS_SPI_IN_PROGRESS  (1 << 0)
+
 static uint8_t status;
+static boolean write_zeros;
 
 #define signal_transfer_complete()              \
     do {                                        \
@@ -58,6 +62,8 @@ static void write_data_buffer(uint8_t* buffer, uint32_t size);
 
 void lcd_init(void)
 {
+    write_zeros = FALSE;
+
     // Initialize uSCSI A1 as SPI master
     UCA1CTLW0 |= UCSWRST;
 
@@ -88,6 +94,14 @@ void lcd_init(void)
     write_command_buffer(cmd_buffer, 6);
 }
 
+void lcd_clear(void)
+{
+    wait_for_transfer();
+    set_cursor_position(0, 0);
+    write_zeros = TRUE;
+    write_data_buffer(NULL, PCD8544_MAXBYTES);
+}
+
 void lcd_draw_bitmap(uint8_t x, uint8_t y, const uint8_t* bitmap, uint32_t bitmap_length)
 {
     wait_for_transfer();
@@ -108,6 +122,18 @@ void lcd_draw_string_n(uint8_t x, uint8_t y, const char* str, uint32_t len)
     {
         c = get_char_buffer(get_char_index(str[i]));
         write_data_buffer((uint8_t*)c, CHARWIDTH);
+    }
+}
+
+void lcd_set_led(boolean on)
+{
+    if (on)
+    {
+        set_led();
+    }
+    else
+    {
+        clr_led();
     }
 }
 
@@ -156,13 +182,23 @@ __interrupt void USCIA1_ISR(void)
     case USCI_SPI_UCTXIFG:
         if (tx_index < tx_size)
         {
-            UCA1TXBUF = tx_buffer[tx_index++];
+            if (write_zeros == TRUE)
+            {
+                UCA1TXBUF = 0x00;
+                tx_index++;
+            }
+            else
+            {
+                UCA1TXBUF = tx_buffer[tx_index++];
+            }
         }
         break;
+
     case USCI_SPI_UCRXIFG:
         if (tx_index == tx_size)
         {
             UCA1IE = 0;
+            write_zeros = FALSE;
             signal_transfer_complete();
         }
         break;

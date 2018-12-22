@@ -4,20 +4,20 @@
 /*-----------------------------------------------
  * Pin Allocations
  *
- * P1.0 GPS GPIO OUTPUT     GPS_EN
+ * P1.0
  * P1.1 DRV TA0.1 PWM       Function 10, output
- * P1.2 SNS UCB0 I2C SDA    Function 01
- * P1.3 SNS UCB0 I2C SCL    Function 01
- * P1.4 GPS UCA0 UART TX    Function 01
- * P1.5 GPS UCA0 UART RX    Function 01
- * P1.6 GPS GPIO INPUT      GPS_FIX
+ * P1.2
+ * P1.3
+ * P1.4
+ * P1.5
+ * P1.6
  * P1.7 DRV GPIO OUTPUT     DRV_DIR
  * P2.0
  * P2.1
  * P2.2
  * P2.3
  * P2.4 LCD UCA1 SPI SCLK   Function 01
- * P2.5
+ * P2.5 LCD LED
  * P2.6 LCD UCA1 SPI SIMO   Function 01
  * P2.7 LCD GPIO OUTPUT     LCD_DC
  * P3.0
@@ -27,7 +27,7 @@
 -----------------------------------------------*/
 
 #define PORT1_DIR       (BIT0 | BIT1 | BIT6 | BIT7)
-#define PORT2_DIR       (BIT7)
+#define PORT2_DIR       (BIT5 | BIT7)
 #define PORT3_DIR       (BIT2)
 
 #define PORT1_SEL0      (  0  |   0  | BIT2 | BIT3 | BIT4 | BIT5 |   0  |   0 )

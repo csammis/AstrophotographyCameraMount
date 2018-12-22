@@ -8,8 +8,9 @@
 
 static event_t events[EVENT_COUNT] =
 {
-    /*          ID                  Period      */
-    /* EVENT_DISPLAY_UPDATE */  {   100     },
+    /* ID                         Period */
+    /* EVENT_DISPLAY_UPDATE */  { 100    },
+    /* EVENT_BUTTON_CHECK   */  { 10     },
 };
 
 void event_disable(event_source_t event)
