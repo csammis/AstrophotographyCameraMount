@@ -24,11 +24,4 @@
 		<nature>org.eclipse.cdt.core.ccnature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
-	<linkedResources>
-		<link>
-			<name>QmathLib.a</name>
-			<type>1</type>
-			<locationURI>PROJECT_LOC/lib/QmathLib/QmathLib.a</locationURI>
-		</link>
-	</linkedResources>
 </projectDescription>
