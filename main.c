@@ -20,7 +20,6 @@ int main(void)
 
     event_enable(EVENT_DISPLAY_UPDATE);
     event_enable(EVENT_BUTTON_CHECK);
-    //driver_start();
 
     while (1)
     {
@@ -50,4 +49,5 @@ void init_startup_peripherals(void)
     buttons_init();
     events_init();
     lcd_init();
+    ui_init();
 }

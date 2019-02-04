@@ -3,8 +3,6 @@
 
 #include <stdint.h>
 
-void graphics_draw_world_map(void);
-
-void graphics_update_world_sweeper(uint32_t elapsed_time);
+void graphics_draw_star_map(void);
 
 #endif

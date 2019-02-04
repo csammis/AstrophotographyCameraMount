@@ -4,20 +4,20 @@
 /*-----------------------------------------------
  * Pin Allocations
  *
- * P1.0
+ * P1.0 DRV GPIO OUTPUT     DRV_DIR
  * P1.1 DRV TA0.1 PWM       Function 10, output
- * P1.2
- * P1.3
+ * P1.2 GPIO OUTPUT         Camera Focus
+ * P1.3 GPIO OUTPUT         Camera Shutter
  * P1.4
  * P1.5
  * P1.6
  * P1.7 DRV GPIO OUTPUT     DRV_DIR
- * P2.0
- * P2.1
+ * P2.0 BTN GPIO INPUT      Select Button
+ * P2.1 BTN GPIO INPUT      Okay Button
  * P2.2
  * P2.3
  * P2.4 LCD UCA1 SPI SCLK   Function 01
- * P2.5 LCD LED
+ * P2.5 LCD GPIO OUTPUT     LCD LED
  * P2.6 LCD UCA1 SPI SIMO   Function 01
  * P2.7 LCD GPIO OUTPUT     LCD_DC
  * P3.0
@@ -26,11 +26,11 @@
  *
 -----------------------------------------------*/
 
-#define PORT1_DIR       (BIT0 | BIT1 | BIT6 | BIT7)
+#define PORT1_DIR       (BIT0 | BIT1 | BIT2 | BIT3 | BIT7)
 #define PORT2_DIR       (BIT5 | BIT7)
 #define PORT3_DIR       (BIT2)
 
-#define PORT1_SEL0      (  0  |   0  | BIT2 | BIT3 | BIT4 | BIT5 |   0  |   0 )
+#define PORT1_SEL0      (  0  |   0  |   0  |   0  |   0  |   0  |   0  |   0 )
 #define PORT1_SEL1      (  0  | BIT1 |   0  |   0  |   0  |   0  |   0  |   0 )
 
 #define PORT2_SEL0      (  0  |   0  |   0  |   0  | BIT4 |   0  | BIT6 |   0 )

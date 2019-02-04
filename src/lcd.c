@@ -96,10 +96,15 @@ void lcd_init(void)
 
 void lcd_clear(void)
 {
+    lcd_clear_banks(0, PCD8544_VBANKS);
+}
+
+void lcd_clear_banks(uint8_t y, uint8_t num_rows)
+{
     wait_for_transfer();
-    set_cursor_position(0, 0);
+    set_cursor_position(0, y);
     write_zeros = TRUE;
-    write_data_buffer(NULL, PCD8544_MAXBYTES);
+    write_data_buffer(NULL, PCD8544_HPIXELS * num_rows);
 }
 
 void lcd_draw_bitmap(uint8_t x, uint8_t y, const uint8_t* bitmap, uint32_t bitmap_length)

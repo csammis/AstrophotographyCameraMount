@@ -1,7 +1,6 @@
 #include "buttons.h"
 #include <msp430.h>
 
-
 #define BUTTON_REG              P2IN
 #define BUTTON_PRESSED_LEVEL    FALSE
 
