@@ -1,20 +1,24 @@
 CHANGELOG
 
+Revision 3:
+    Schematic:
+    * Fix: Swap pins 7/8 from MSP430 into pins 10/11 on A3967
+
 Revision 2:
-	Schematic:
+    Schematic:
     * Fix: Tie A3967 /ENABLE to GND
     * Change: Update connector footprints to JST-XH
     * Add: inline resistors to A3967 /ENABLE, /RESET, and /SLEEP
     * Add: PD resistors to STEP and DIR
     * Add: test points to GND and 3.3V
     * Add: jumpers to enable driving GND and 3.3V from ez-FET
-	* Add: Two switches for user input control
+    * Add: Two switches for user input control
 
-	PCB:
-	* Change: Enlarged board to accomodate JST headers and pushbuttons
-	* Change: Reduced via count where possible by routing traces to
-			  headers on B.Cu instead of jumping back up to F.Cu
-	* Change: Shortened traces from pads to power plane vias
-			
+    PCB:
+    * Change: Enlarged board to accomodate JST headers and pushbuttons
+    * Change: Reduced via count where possible by routing traces to
+              headers on B.Cu instead of jumping back up to F.Cu
+    * Change: Shortened traces from pads to power plane vias
+
 Revision 1:
     * Initial Release
