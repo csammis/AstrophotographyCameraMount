@@ -18,6 +18,7 @@ Sourced from SMCLK running at 1MHz:
 *************************************************/
 #define SIDEREAL_PWM_PERIOD 5385
 #define LUNAR_PWM_PERIOD    5516
+#define TEST_PWM_PERIOD        500
 
 #define TMR_CLK_SRC TASSEL__SMCLK
 
@@ -37,6 +38,9 @@ void driver_start(void)
         break;
     case ROTATION_SIDEREAL:
         set_rate(SIDEREAL_PWM_PERIOD);
+        break;
+    case ROTATION_TEST:
+        set_rate(TEST_PWM_PERIOD);
         break;
     }
     TA0CTL = TMR_CLK_SRC | MC__UP | TACLR;

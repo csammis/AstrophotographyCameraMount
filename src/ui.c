@@ -56,11 +56,12 @@ static const char* timer_menu[TIMER_MENU_ITEMS] =
     "  120 seconds"
 };
 
-#define SPEED_MENU_ITEMS    2
+#define SPEED_MENU_ITEMS    3
 static const char* speed_menu[SPEED_MENU_ITEMS] =
 {
     "  Sidereal",
-    "  Lunar"
+    "  Lunar",
+    "  Gearbox Test"
 };
 
 #define RUNNING_MENU_ITEMS  1
@@ -172,7 +173,16 @@ void ui_process_ok_press(void)
             case 0:
                 driver_start();
                 set_active_menu(UI_MENU_RUNNING, 0);
-                graphics_draw_star_map();
+                switch (options_get_rotation_speed())
+                {
+                case ROTATION_SIDEREAL:
+                    graphics_draw_star_map();
+                    break;
+                case ROTATION_LUNAR:
+                case ROTATION_TEST:
+                    graphics_draw_test_graphic();
+                    break;
+                }
                 break;
             case 1:
                 set_active_menu(UI_MENU_TIMER, options_get_shutter_speed());

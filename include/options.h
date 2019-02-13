@@ -6,7 +6,8 @@
 typedef uint8_t rotation_speed_t; enum
 {
     ROTATION_SIDEREAL,
-    ROTATION_LUNAR
+    ROTATION_LUNAR,
+    ROTATION_TEST
 };
 
 typedef uint8_t shutter_speed_t; enum

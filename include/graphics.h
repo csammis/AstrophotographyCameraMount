@@ -4,5 +4,6 @@
 #include <stdint.h>
 
 void graphics_draw_star_map(void);
+void graphics_draw_test_graphic(void);
 
 #endif
