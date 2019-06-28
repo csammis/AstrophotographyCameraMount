@@ -1,0 +1,9 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP ILD205
+D Dual Optocoupler, NPN Phototransistor Output
+K NPN DC Dual Optocoupler
+F https://www.vishay.com/docs/83640/ild74.pdf
+$ENDCMP
+#
+#End Doc Library

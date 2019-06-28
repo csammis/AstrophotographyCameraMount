@@ -3,6 +3,18 @@ CHANGELOG
 Revision 3:
     Schematic:
     * Fix: Swap pins 7/8 from MSP430 into pins 10/11 on A3967
+    * Fix: Use optoisolator to handle camera trigger control
+    * Fix: Use load switch for backlight LED instead of sourcing from MCU
+    * Add: GPIO controls for stepper driver enable, sleep, and reset
+    * Add: Pullup on OK_BTN to enable future PORT wakeup features
+    * Add: Components and footprints for XT1
+    * Change: Rearrange and prettify schematic components
+    * Change: Use fixed output LDO to supply 3.3V
+
+    PCB:
+    * Add: Moved buttons offboard via 3 pin header
+    * Add: M2 screw holes, silkscreen logo
+    * Change: Move some components to back side, shrink the board size
 
 Revision 2:
     Schematic:

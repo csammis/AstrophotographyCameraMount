@@ -1,0 +1,16 @@
+EESchema-LIBRARY Version 2.4
+#encoding utf-8
+#
+# ProjectLogo
+#
+DEF ProjectLogo LG 0 40 Y Y 1 F N
+F0 "LG" -200 200 39 H V L CNN
+F1 "ProjectLogo" -200 0 39 H V L CNN
+F2 "Logo:v" 0 0 39 H I C CNN
+F3 "" 0 0 39 H I C CNN
+DRAW
+T 0 -100 100 59 0 0 0 LOGO Normal 0 C C
+ENDDRAW
+ENDDEF
+#
+#End Library

@@ -9,6 +9,7 @@ _autosave-*
 *-rescue.lib
 *-save.pro
 *-save.kicad_pcb
+*cache*
 
 *.xml
 *.csv
