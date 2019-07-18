@@ -1,7 +1,7 @@
 (sym_lib_table
-  (lib (name MSP430FR2433)(type Legacy)(uri C:/Users/csamm/Projects/BarnDoorMount/board/MSP430FR2433.lib)(options "")(descr ""))
-  (lib (name Allegro)(type Legacy)(uri C:/Users/csamm/Projects/BarnDoorMount/board/Allegro.lib)(options "")(descr ""))
   (lib (name LocalGraphics)(type Legacy)(uri ${KIPRJMOD}/LocalGraphics.lib)(options "")(descr ""))
   (lib (name LocalIsolator)(type Legacy)(uri ${KIPRJMOD}/LocalIsolator.lib)(options "")(descr ""))
   (lib (name LocalSwitches)(type Legacy)(uri ${KIPRJMOD}/LocalSwitches.lib)(options "")(descr ""))
+  (lib (name LocalPower)(type Legacy)(uri ${KIPRJMOD}/LocalPower.lib)(options "")(descr ""))
+  (lib (name LocalICs)(type Legacy)(uri ${KIPRJMOD}/LocalICs.lib)(options "")(descr ""))
 )
